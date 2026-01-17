@@ -1,0 +1,95 @@
+{
+  "currentUser": {
+    "id": "u1",
+    "username": "admin",
+    "name": "Alex 开发",
+    "avatar": "https://picsum.photos/200/200"
+  },
+  "sps": [
+    {
+      "id": "sp_1",
+      "name": "sp_GetCustomerOrders",
+      "description": "获取指定客户的所有订单，支持按日期过滤。",
+      "db": "CRM_DB",
+      "currentVersion": "v1.2",
+      "tags": ["销售", "报表"],
+      "versions": [
+        {
+          "version": "v1.2",
+          "date": "2023-10-25 14:30",
+          "author": "Alex 开发",
+          "comment": "添加索引提示以优化性能",
+          "content": "CREATE PROCEDURE sp_GetCustomerOrders\n    @CustomerId INT,\n    @StartDate DATE = NULL\nAS\nBEGIN\n    SET NOCOUNT ON;\n\n    SELECT o.OrderId, o.OrderDate, o.TotalAmount\n    FROM Orders o WITH(INDEX(IX_Order_Customer))\n    WHERE o.CustomerId = @CustomerId\n      AND (@StartDate IS NULL OR o.OrderDate >= @StartDate);\nEND"
+        },
+        {
+          "version": "v1.1",
+          "date": "2023-10-20 09:15",
+          "author": "Jane Doe",
+          "comment": "新增 StartDate 参数",
+          "content": "CREATE PROCEDURE sp_GetCustomerOrders\n    @CustomerId INT,\n    @StartDate DATE = NULL\nAS\nBEGIN\n    SET NOCOUNT ON;\n\n    SELECT o.OrderId, o.OrderDate, o.TotalAmount\n    FROM Orders o\n    WHERE o.CustomerId = @CustomerId\n      AND (@StartDate IS NULL OR o.OrderDate >= @StartDate);\nEND"
+        },
+        {
+          "version": "v1.0",
+          "date": "2023-10-01 10:00",
+          "author": "Alex 开发",
+          "comment": "初始化创建",
+          "content": "CREATE PROCEDURE sp_GetCustomerOrders\n    @CustomerId INT\nAS\nBEGIN\n    SET NOCOUNT ON;\n\n    SELECT o.OrderId, o.OrderDate, o.TotalAmount\n    FROM Orders o\n    WHERE o.CustomerId = @CustomerId;\nEND"
+        }
+      ]
+    },
+    {
+      "id": "sp_2",
+      "name": "sp_CalculateMonthlyRevenue",
+      "description": "汇总所有区域的月度收入报表。",
+      "db": "FINANCE_DB",
+      "currentVersion": "v2.0",
+      "tags": ["财务", "批处理"],
+      "versions": [
+        {
+          "version": "v2.0",
+          "date": "2023-10-24 16:45",
+          "author": "Mike Ross",
+          "comment": "针对新架构进行重大重构",
+          "content": "CREATE PROCEDURE sp_CalculateMonthlyRevenue\n    @Month INT,\n    @Year INT\nAS\nBEGIN\n    -- New schema logic\n    SELECT Region, SUM(Amount) as Revenue\n    FROM RevenueEntries\n    WHERE Month = @Month AND Year = @Year\n    GROUP BY Region;\nEND"
+        },
+        {
+          "version": "v1.0",
+          "date": "2023-09-15 11:30",
+          "author": "Mike Ross",
+          "comment": "初始版本",
+          "content": "CREATE PROCEDURE sp_CalculateMonthlyRevenue\n    @Month INT,\n    @Year INT\nAS\nBEGIN\n    SELECT Region, SUM(Total) as Revenue\n    FROM OldSalesTable\n    WHERE Month = @Month AND Year = @Year\n    GROUP BY Region;\nEND"
+        }
+      ]
+    },
+    {
+      "id": "sp_3",
+      "name": "sp_UserLoginAudit",
+      "description": "记录用户登录尝试到审计表。",
+      "db": "AUTH_DB",
+      "currentVersion": "v1.0",
+      "tags": ["安全", "认证"],
+      "versions": [
+        {
+          "version": "v1.0",
+          "date": "2023-10-26 08:00",
+          "author": "Sarah Security",
+          "comment": "初始实现",
+          "content": "CREATE PROCEDURE sp_UserLoginAudit\n    @UserId INT,\n    @Success BIT,\n    @IpAddress VARCHAR(50)\nAS\nBEGIN\n    INSERT INTO AuditLog (UserId, LoginTime, IsSuccess, IP)\n    VALUES (@UserId, GETDATE(), @Success, @IpAddress);\nEND"
+        }
+      ]
+    }
+  ],
+  "activities": [
+    { "id": "1", "spId": "sp_3", "spName": "sp_UserLoginAudit", "type": "CREATE", "user": "Sarah Security", "timestamp": "2023-10-26 08:00", "description": "创建了新的审计存储过程" },
+    { "id": "2", "spId": "sp_1", "spName": "sp_GetCustomerOrders", "type": "UPDATE", "user": "Alex 开发", "timestamp": "2023-10-25 14:30", "description": "更新了性能提示 (Index Hint)" },
+    { "id": "3", "spId": "sp_2", "spName": "sp_CalculateMonthlyRevenue", "type": "UPDATE", "user": "Mike Ross", "timestamp": "2023-10-24 16:45", "description": "为 Schema V2 进行了重构" },
+    { "id": "4", "spId": "sp_1", "spName": "sp_GetCustomerOrders", "type": "UPDATE", "user": "Jane Doe", "timestamp": "2023-10-20 09:15", "description": "添加了可选参数" },
+    { "id": "5", "spId": "sp_2", "spName": "sp_CalculateMonthlyRevenue", "type": "ROLLBACK", "user": "Admin", "timestamp": "2023-10-18 10:00", "description": "因 Bug 回滚至 v1.0" }
+  ],
+  "stats": {
+    "total": 142,
+    "newThisMonth": 12,
+    "changedThisMonth": 34,
+    "activeDevelopers": 8
+  }
+}

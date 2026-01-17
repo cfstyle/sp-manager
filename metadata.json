@@ -1,0 +1,5 @@
+{
+  "name": "sp-manager",
+  "description": "A comprehensive Stored Procedure Management Platform for viewing, editing, versioning, and analyzing SQL stored procedures.",
+  "requestFramePermissions": []
+}
