@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables
+.env
+.env.test
+.env.production
+.env.local
+
+# Testing
+coverage/
