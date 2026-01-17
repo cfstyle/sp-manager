@@ -26,11 +26,15 @@
         /* Priority: Noto Sans SC (Web), PingFang (Mac), YaHei (Win), Sans */
         font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'SimHei', system-ui, -apple-system, sans-serif;
         background-color: #f3f4f6;
+        margin: 0;
+      }
+      #app {
+        height: 100vh;
       }
     </style>
-    <script type="module" src="/index.tsx"></script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="app"></div>
+    <script type="module" src="/main.ts"></script>
   </body>
 </html>

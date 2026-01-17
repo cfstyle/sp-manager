@@ -3,28 +3,29 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "SP Manager Project",
-  "author": "Antigravity",
-  "license": "MIT",
+  "description": "SP Manager Project - Vue 3 + Element Plus",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@monaco-editor/react": "4.6.0",
-    "lucide-react": "^0.562.0",
+    "@element-plus/icons-vue": "^2.3.1",
+    "echarts": "^5.5.0",
+    "element-plus": "^2.6.0",
+    "lucide-vue-next": "^0.363.0",
     "monaco-editor": "^0.45.0",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "react-is": "^19.2.3",
-    "react-router-dom": "^7.12.0",
-    "recharts": "^3.6.0"
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21",
+    "vue-echarts": "^6.6.9",
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/node": "^20.11.24",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "sass": "^1.71.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.1.4",
+    "vite-plugin-monaco-editor-nls": "^3.0.1"
   }
 }

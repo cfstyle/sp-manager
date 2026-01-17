@@ -84,6 +84,7 @@ export const mockData = {
       "next": "http://localhost:8000/api/spmanager/procedures/history/?limit=10&offset=10&procedure_id=1355",
       "previous": null,
       "results": [
+        { "id": 1454, "procedure_id": "1355", "version_number": 17, "modified_by_name": "陈飞", "modified_at": "2026-01-18T10:00:00.000000", "change_summary": "这是一条极长文字记载的测试数据。我们需要验证在版本历史记录的侧边栏中，如果变更说明的文字内容非常多，是否会撑破现有的 UI 布局。这段文字包含了很多业务逻辑的描述，例如：更新了资金清算的对账逻辑，修复了在跨行转账场景下可能出现的金额精度丢失问题，并且针对 2026 年春季的大促活动增加了动态限流插件的初始化配置。", "is_rollback": false },
         { "id": 1453, "procedure_id": "1355", "version_number": 16, "modified_by_name": "陈飞", "modified_at": "2026-01-17T14:36:44.286530", "change_summary": "测试更新", "is_rollback": false },
         { "id": 1452, "procedure_id": "1355", "version_number": 15, "modified_by_name": "陈飞", "modified_at": "2026-01-17T14:35:24.808971", "change_summary": "回滚到版本 V1 (ID:1352)", "is_rollback": true },
         { "id": 1451, "procedure_id": "1355", "version_number": 14, "modified_by_name": "陈飞", "modified_at": "2026-01-17T14:35:16.981360", "change_summary": "测试更新", "is_rollback": false },
