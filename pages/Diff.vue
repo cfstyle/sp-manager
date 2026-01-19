@@ -14,15 +14,65 @@
           </h1>
         </div>
       </div>
-      <el-button type="danger" plain @click="handleRollback">
-        <RotateCcw class="w-4 h-4 mr-1" /> 回滚至该历史版本
-      </el-button>
     </div>
 
     <div class="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-      <div class="grid grid-cols-2 bg-gray-50 border-b border-gray-200 text-sm font-bold text-gray-500">
-          <div class="p-3 pl-14 border-r border-gray-200">历史选定版本 (ID: {{ v2 }})</div>
-          <div class="p-3 pl-14">当前对比版本 (ID: {{ v1 }})</div>
+      <div class="grid grid-cols-2 bg-gray-50 border-b border-gray-200 text-sm font-bold">
+          <!-- 历史版本 - 左侧 - 橙色主题 -->
+          <div class="px-4 py-1.5 border-r border-gray-200 bg-orange-50 flex items-center gap-3">
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+              <span class="text-orange-700 whitespace-nowrap">历史版本</span>
+            </div>
+            <el-select 
+              v-model="selectedV2" 
+              placeholder="选择历史版本" 
+              size="small"
+              class="flex-1"
+              @change="handleVersionChange"
+            >
+              <el-option
+                v-for="item in historyList"
+                :key="item.id"
+                :label="`V${item.version_number} - ${item.change_summary}`"
+                :value="item.id"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="font-mono text-xs">V{{ item.version_number }}</span>
+                  <span class="text-xs text-gray-500 ml-2 truncate max-w-[200px]">{{ item.change_summary }}</span>
+                </div>
+              </el-option>
+            </el-select>
+            <el-button type="danger" size="small" plain class="!py-1 shrink-0" @click="handleRollback">
+              <RotateCcw class="w-3.5 h-3.5 mr-1" /> 回滚
+            </el-button>
+          </div>
+          <!-- 当前版本 - 右侧 - 蓝色主题 -->
+          <div class="px-4 py-1.5 bg-blue-50 flex items-center gap-3">
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="w-2.5 h-2.5 rounded-full bg-blue-500"></div>
+              <span class="text-blue-700 whitespace-nowrap">对比版本</span>
+            </div>
+            <el-select 
+              v-model="selectedV1" 
+              placeholder="选择对比版本" 
+              size="small"
+              class="flex-1"
+              @change="handleVersionChange"
+            >
+              <el-option
+                v-for="item in historyList"
+                :key="item.id"
+                :label="`V${item.version_number} - ${item.change_summary}`"
+                :value="item.id"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="font-mono text-xs">V{{ item.version_number }}</span>
+                  <span class="text-xs text-gray-500 ml-2 truncate max-w-[200px]">{{ item.change_summary }}</span>
+                </div>
+              </el-option>
+            </el-select>
+          </div>
       </div>
       <div class="flex-1 relative">
         <div ref="diffContainer" class="w-full h-full"></div>
@@ -32,13 +82,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import * as monaco from 'monaco-editor';
 import { ArrowLeft, RotateCcw } from 'lucide-vue-next';
 import { ElMessageBox, ElMessage } from 'element-plus';
 import { api } from '@/services/api';
-import type { DiffResponse } from '@/types';
+import type { DiffResponse, HistoryItem } from '@/types';
 
 const route = useRoute();
 const router = useRouter();
@@ -49,6 +99,22 @@ const v2 = computed(() => route.params.v2 as string);
 const diffContainer = ref<HTMLElement | null>(null);
 let diffEditor: monaco.editor.IStandaloneDiffEditor | null = null;
 const diffData = ref<DiffResponse | null>(null);
+const historyList = ref<HistoryItem[]>([]);
+const selectedV1 = ref<number>(0);
+const selectedV2 = ref<number>(0);
+
+// 加载历史版本列表
+const loadHistory = async () => {
+  try {
+    const data = await api.getHistory({ procedure_id: id.value });
+    historyList.value = data.results || [];
+    // 初始化选中的版本
+    selectedV1.value = parseInt(v1.value);
+    selectedV2.value = parseInt(v2.value);
+  } catch (err) {
+    console.error('加载历史版本失败', err);
+  }
+};
 
 const loadDiff = async () => {
   if (v1.value && v2.value) {
@@ -56,6 +122,13 @@ const loadDiff = async () => {
       const data = await api.getDiff(v1.value, v2.value);
       diffData.value = data;
       if (diffEditor) {
+        // 先获取并销毁旧模型，防止内存泄漏
+        const oldModel = diffEditor.getModel();
+        if (oldModel) {
+          oldModel.original.dispose();
+          oldModel.modified.dispose();
+        }
+
         const originalModel = monaco.editor.createModel(data.content_v2, 'sql');
         const modifiedModel = monaco.editor.createModel(data.content_v1, 'sql');
         diffEditor.setModel({
@@ -70,7 +143,22 @@ const loadDiff = async () => {
   }
 };
 
+// 处理版本切换
+const handleVersionChange = () => {
+  if (selectedV1.value && selectedV2.value) {
+    router.push(`/diff/${id.value}/${selectedV1.value}/${selectedV2.value}`);
+  }
+};
+
+// 监听路由变化,重新加载对比
+watch([v1, v2], () => {
+  loadDiff();
+  selectedV1.value = parseInt(v1.value);
+  selectedV2.value = parseInt(v2.value);
+});
+
 onMounted(() => {
+  loadHistory();
   if (diffContainer.value) {
     diffEditor = monaco.editor.createDiffEditor(diffContainer.value, {
       theme: 'vs',

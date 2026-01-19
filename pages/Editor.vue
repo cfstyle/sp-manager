@@ -361,8 +361,14 @@ onMounted(() => {
       scrollBeyondLastLine: false,
     });
 
+    let isInitialLoad = true;
     editor.onDidChangeModelContent(() => {
-      code.value = editor?.getValue() || '';
+      const newValue = editor?.getValue() || '';
+      if (isInitialLoad) {
+        isInitialLoad = false;
+        return;
+      }
+      code.value = newValue;
       if (!isCreating.value && !viewingVersion.value) {
         isDirty.value = true;
       }
@@ -377,11 +383,15 @@ onBeforeUnmount(() => {
 const handleSaveClick = () => {
   if (isCreating.value) {
     if (!parsedName.value) {
-      ElMessage.warning('无法识别存储过程名称，请先在代码中定义');
+      ElMessage.warning('无法识别存储过程名称,请先在代码中定义');
       return;
     }
     showCreateModal.value = true;
   } else {
+    if (!procedureDescription.value.trim()) {
+      ElMessage.warning('业务描述不能为空,请先填写业务描述');
+      return;
+    }
     showSaveModal.value = true;
   }
 };
@@ -410,6 +420,7 @@ const handleCreate = async () => {
     });
     if (response.flag) {
       ElMessage.success('创建成功');
+      showCreateModal.value = false;
       router.replace(`/editor/${response.id}`);
     } else {
       ElMessage.error(response.message || '创建失败');
